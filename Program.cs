@@ -24,6 +24,7 @@ namespace _9_Dragon_fly
         private string imgDragon;
         private string imgFireball;
         private string imgSpear;
+        private string imgHeart;
 
         private Music music;
 
@@ -32,11 +33,15 @@ namespace _9_Dragon_fly
         public void Start()
         {
             var delay = 10;
+            var hp = 3;
 
             InitWindow(1280, 720, "Heroes III - Dragon fly");
             LoadAssets();
 
             music.Play();
+
+            float spearX = 1280;
+            float fireballX = 1280;
 
             while (true)
             {
@@ -44,7 +49,10 @@ namespace _9_Dragon_fly
                 ClearWindow(Color.Transparent);
 
                 DrawBg();
-                DrawDragon(MouseX, MouseY, FlySpeedEnum.VerySlow);
+                DrawDragon(MouseX, MouseY, SpeedEnum.VerySlow);
+                DrawSpear(spearX, 300, SpeedEnum.VerySlow, out spearX);
+                DrawFireball(fireballX, 600, SpeedEnum.VerySlow, out fireballX);
+                DrawHp(hp);
 
                 DisplayWindow();
                 Delay(delay);
@@ -63,6 +71,14 @@ namespace _9_Dragon_fly
             imgDragon = LoadTexture("assets/dragon.png");
             imgFireball = LoadTexture("assets/fireball.png");
             imgSpear = LoadTexture("assets/spear.png");
+            imgHeart = LoadTexture("assets/heart.png");
+        }
+
+        private void DrawHp(int hp)
+        {
+            DrawSprite(imgHeart, 20, 20);
+            DrawSprite(imgHeart, 60, 20);
+            DrawSprite(imgHeart, 100, 20);
         }
 
         private void DrawBg()
@@ -70,7 +86,7 @@ namespace _9_Dragon_fly
             DrawSprite(imgBg, 0, 0);
         }
 
-        private void DrawDragon(float x, float y, FlySpeedEnum speed)
+        private void DrawDragon(float x, float y, SpeedEnum speed)
         {
             var ms = dragonClock.ElapsedTime.AsMilliseconds();
             var needRestart = false;
@@ -83,11 +99,11 @@ namespace _9_Dragon_fly
             var msStep = 100;
             switch (speed)
             {
-                case FlySpeedEnum.VerySlow: msStep = 150; break;
-                case FlySpeedEnum.Slow: msStep = 125; break;
-                case FlySpeedEnum.Normal: msStep = 100; break;
-                case FlySpeedEnum.Fast: msStep = 85; break;
-                case FlySpeedEnum.VeryFast: msStep = 70; break;
+                case SpeedEnum.VerySlow: msStep = 150; break;
+                case SpeedEnum.Slow: msStep = 125; break;
+                case SpeedEnum.Normal: msStep = 100; break;
+                case SpeedEnum.Fast: msStep = 85; break;
+                case SpeedEnum.VeryFast: msStep = 70; break;
             }
 
             y -= dragonSpriteHeight / 2;
@@ -121,7 +137,41 @@ namespace _9_Dragon_fly
             DrawSprite(imgDragon, x, y, 0, spriteOffsetY, dragonSpriteWidth, dragonSpriteHeight);
         }
 
-        private enum FlySpeedEnum
+        private void DrawSpear(float x, float y, SpeedEnum speed, out float nextX)
+        {
+            var dX = 1;
+            switch (speed)
+            {
+                case SpeedEnum.VerySlow: dX = 1; break;
+                case SpeedEnum.Slow: dX = 2; break;
+                case SpeedEnum.Normal: dX = 3; break;
+                case SpeedEnum.Fast: dX = 4; break;
+                case SpeedEnum.VeryFast: dX = 5; break;
+            }
+
+            nextX = x - dX;
+
+            DrawSprite(imgSpear, nextX, y);
+        }
+
+        private void DrawFireball(float x, float y, SpeedEnum speed, out float nextX)
+        {
+            var dX = 1;
+            switch (speed)
+            {
+                case SpeedEnum.VerySlow: dX = 1; break;
+                case SpeedEnum.Slow: dX = 2; break;
+                case SpeedEnum.Normal: dX = 3; break;
+                case SpeedEnum.Fast: dX = 4; break;
+                case SpeedEnum.VeryFast: dX = 5; break;
+            }
+
+            nextX = x - dX;
+
+            DrawSprite(imgFireball, nextX, y);
+        }
+
+        private enum SpeedEnum
         {
             VerySlow,
             Slow,
