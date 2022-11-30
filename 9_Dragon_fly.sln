@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33027.164
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "9_Dragon_fly", "9_Dragon_fly.csproj", "{656B3C6A-FEC3-4D6E-ADA7-06997E27E463}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{656B3C6A-FEC3-4D6E-ADA7-06997E27E463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{656B3C6A-FEC3-4D6E-ADA7-06997E27E463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{656B3C6A-FEC3-4D6E-ADA7-06997E27E463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{656B3C6A-FEC3-4D6E-ADA7-06997E27E463}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D1E742E-A0AF-408C-8A39-97A692AB8A79}
+	EndGlobalSection
+EndGlobal
