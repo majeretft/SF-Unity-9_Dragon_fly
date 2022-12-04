@@ -30,6 +30,8 @@ namespace _9_Dragon_fly
 
         private Clock dragonClock = new Clock();
 
+        private Random rnd = new Random();
+
         public void Start()
         {
             var delay = 10;
@@ -40,18 +42,31 @@ namespace _9_Dragon_fly
 
             music.Play();
 
-            float spearX = 1280;
-            float fireballX = 1280;
+            var fireballsPos = new List<ProjectileCoord>();
+            var spearsPos = new List<ProjectileCoord>();
+            var currentDifficulty = DifficultyEnum.VeryLow;
+            var difficultyClock = new Clock();
 
             while (true)
             {
                 DispatchEvents();
                 ClearWindow(Color.Transparent);
 
+                currentDifficulty = GetDifficulty(difficultyClock, currentDifficulty);
+                spearsPos = FilterProjectile(spearsPos, 190);
+                fireballsPos = FilterProjectile(fireballsPos, 115);
+                AddProjectile(spearsPos, fireballsPos, currentDifficulty);
+
                 DrawBg();
-                DrawDragon(MouseX, MouseY, SpeedEnum.VerySlow);
-                DrawSpear(spearX, 300, SpeedEnum.VerySlow, out spearX);
-                DrawFireball(fireballX, 600, SpeedEnum.VerySlow, out fireballX);
+                DrawDragon(MouseX, MouseY, currentDifficulty);
+
+                foreach (var p in spearsPos)
+                    DrawSpear(p, currentDifficulty);
+
+
+                foreach (var p in fireballsPos)
+                    DrawFireball(p, currentDifficulty);
+
                 DrawHp(hp);
 
                 DisplayWindow();
@@ -59,11 +74,96 @@ namespace _9_Dragon_fly
             }
         }
 
+        private DifficultyEnum GetDifficulty(Clock clock, DifficultyEnum prev)
+        {
+            var duration = clock.ElapsedTime.AsSeconds();
+
+            var rd = rnd.Next(50, 100) / 100f;
+            var ri = rnd.Next(1, 100);
+
+            if (duration * rd > 15)
+            {
+                clock.Restart();
+
+                if (ri > 80)
+                    return DifficultyEnum.VeryHigh;
+                if (ri > 60)
+                    return DifficultyEnum.High;
+                if (ri > 30)
+                    return DifficultyEnum.Normal;
+                if (ri > 15)
+                    return DifficultyEnum.Low;
+                return DifficultyEnum.VeryLow;
+            }
+
+            return prev;
+        }
+
+        private List<ProjectileCoord> FilterProjectile(List<ProjectileCoord> list, float width)
+        {
+            return list.Where(x => x.X > -width).ToList();
+        }
+
+        private void AddProjectile(List<ProjectileCoord> spears, List<ProjectileCoord> fireballs, DifficultyEnum difficulty)
+        {
+            var max = 2;
+            var dx1 = 0;
+            var dx2 = 0;
+
+            switch (difficulty)
+            {
+                case DifficultyEnum.VeryLow:
+                    dx1 = 1100;
+                    dx2 = 1150;
+                    max = 6;
+                    break;
+                case DifficultyEnum.Low:
+                    dx1 = 1120;
+                    dx2 = 1170;
+                    max = 8;
+                    break;
+                case DifficultyEnum.Normal:
+                    dx1 = 1150;
+                    dx2 = 1200;
+                    max = 11;
+                    break;
+                case DifficultyEnum.High:
+                    dx1 = 1180;
+                    dx2 = 1250;
+                    max = 16;
+                    break;
+                case DifficultyEnum.VeryHigh:
+                    dx1 = 1220;
+                    dx2 = 1280;
+                    max = 20;
+                    break;
+            }
+
+            if (spears.Count + fireballs.Count >= max)
+                return;
+
+            var delta = rnd.Next(101, 140) / 100f;
+
+            if (!spears.Any(x => x.X > dx1)
+                && ((rnd.Next(0, 100) >= 0 && rnd.Next(0, 100) < 25) || (rnd.Next(0, 100) >= 50 && rnd.Next(0, 100) < 75)))
+            {
+                spears.Add(new ProjectileCoord(1280 * delta, rnd.Next(10, 720 - 40)));
+                return;
+            }
+
+            if (!fireballs.Any(x => x.X > dx2)
+                && ((rnd.Next(0, 100) >= 25 && rnd.Next(0, 100) < 50) || (rnd.Next(0, 100) >= 75 && rnd.Next(0, 100) < 100)))
+            {
+                fireballs.Add(new ProjectileCoord(1280 * delta, rnd.Next(10, 720 - 80)));
+                return;
+            }
+        }
+
         private void LoadAssets()
         {
             music = new Music("assets/music.wav")
             {
-                Volume = 0.75f,
+                Volume = 1,
                 Loop = true,
             };
 
@@ -76,9 +176,12 @@ namespace _9_Dragon_fly
 
         private void DrawHp(int hp)
         {
-            DrawSprite(imgHeart, 20, 20);
-            DrawSprite(imgHeart, 60, 20);
-            DrawSprite(imgHeart, 100, 20);
+            if (hp >= 3)
+                DrawSprite(imgHeart, 100, 20);
+            if (hp >= 2)
+                DrawSprite(imgHeart, 20, 20);
+            if (hp >= 1)
+                DrawSprite(imgHeart, 60, 20);
         }
 
         private void DrawBg()
@@ -86,7 +189,7 @@ namespace _9_Dragon_fly
             DrawSprite(imgBg, 0, 0);
         }
 
-        private void DrawDragon(float x, float y, SpeedEnum speed)
+        private void DrawDragon(float x, float y, DifficultyEnum speed)
         {
             var ms = dragonClock.ElapsedTime.AsMilliseconds();
             var needRestart = false;
@@ -99,11 +202,11 @@ namespace _9_Dragon_fly
             var msStep = 100;
             switch (speed)
             {
-                case SpeedEnum.VerySlow: msStep = 150; break;
-                case SpeedEnum.Slow: msStep = 125; break;
-                case SpeedEnum.Normal: msStep = 100; break;
-                case SpeedEnum.Fast: msStep = 85; break;
-                case SpeedEnum.VeryFast: msStep = 70; break;
+                case DifficultyEnum.VeryLow: msStep = 170; break;
+                case DifficultyEnum.Low: msStep = 140; break;
+                case DifficultyEnum.Normal: msStep = 120; break;
+                case DifficultyEnum.High: msStep = 90; break;
+                case DifficultyEnum.VeryHigh: msStep = 60; break;
             }
 
             y -= dragonSpriteHeight / 2;
@@ -137,47 +240,59 @@ namespace _9_Dragon_fly
             DrawSprite(imgDragon, x, y, 0, spriteOffsetY, dragonSpriteWidth, dragonSpriteHeight);
         }
 
-        private void DrawSpear(float x, float y, SpeedEnum speed, out float nextX)
+        private void DrawSpear(ProjectileCoord p, DifficultyEnum speed)
         {
             var dX = 1;
             switch (speed)
             {
-                case SpeedEnum.VerySlow: dX = 1; break;
-                case SpeedEnum.Slow: dX = 2; break;
-                case SpeedEnum.Normal: dX = 3; break;
-                case SpeedEnum.Fast: dX = 4; break;
-                case SpeedEnum.VeryFast: dX = 5; break;
+                case DifficultyEnum.VeryLow: dX = 4; break;
+                case DifficultyEnum.Low: dX = 5; break;
+                case DifficultyEnum.Normal: dX = 6; break;
+                case DifficultyEnum.High: dX = 8; break;
+                case DifficultyEnum.VeryHigh: dX = 9; break;
             }
 
-            nextX = x - dX;
+            p.X -= dX;
 
-            DrawSprite(imgSpear, nextX, y);
+            DrawSprite(imgSpear, p.X, p.Y);
         }
 
-        private void DrawFireball(float x, float y, SpeedEnum speed, out float nextX)
+        private void DrawFireball(ProjectileCoord p, DifficultyEnum speed)
         {
             var dX = 1;
             switch (speed)
             {
-                case SpeedEnum.VerySlow: dX = 1; break;
-                case SpeedEnum.Slow: dX = 2; break;
-                case SpeedEnum.Normal: dX = 3; break;
-                case SpeedEnum.Fast: dX = 4; break;
-                case SpeedEnum.VeryFast: dX = 5; break;
+                case DifficultyEnum.VeryLow: dX = 5; break;
+                case DifficultyEnum.Low: dX = 6; break;
+                case DifficultyEnum.Normal: dX = 8; break;
+                case DifficultyEnum.High: dX = 10; break;
+                case DifficultyEnum.VeryHigh: dX = 12; break;
             }
 
-            nextX = x - dX;
+            p.X -= dX;
 
-            DrawSprite(imgFireball, nextX, y);
+            DrawSprite(imgFireball, p.X, p.Y);
         }
 
-        private enum SpeedEnum
+        private enum DifficultyEnum
         {
-            VerySlow,
-            Slow,
+            VeryLow,
+            Low,
             Normal,
-            Fast,
-            VeryFast,
+            High,
+            VeryHigh,
+        }
+
+        private class ProjectileCoord
+        {
+            public float X { get; set; }
+            public float Y { get; set; }
+
+            public ProjectileCoord(float X, float Y)
+            {
+                this.X = X;
+                this.Y = Y;
+            }
         }
     }
 }
