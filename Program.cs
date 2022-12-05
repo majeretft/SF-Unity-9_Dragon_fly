@@ -30,7 +30,7 @@ namespace _9_Dragon_fly
         private string sound1;
         private string sound2;
         private bool isAudioEnabled = false;
-        private float volSound = 10;
+        private float volSound = 20;
         private float defaultVolMusic = 10;
 
         private readonly Clock dragonClock = new Clock();
